@@ -27,7 +27,7 @@ sudo apt install ssh pdsh openssh-server openssh-client
 ### JAVA
 
 Необходимо установить Java подходящей для Hadoop версией:
-- узнать версию можно по [ссылке](https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions);-
+- узнать версию можно по [ссылке](https://cwiki.apache.org/confluence/display/HADOOP/Hadoop+Java+Versions);
 - проверить установку можно командой `java -version`.
 
 Команда установки зависит от выбранной версии, Java 8 версии можно установить командой:
