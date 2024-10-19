@@ -55,6 +55,19 @@ bash ./scripts/create-user.sh
 
 ### Заполнение хостов
 
+Создайте файл `hostnames.txt` с описанием всех узлов кластера вида:
+
+```txt
+ip1 hostname1
+ip2 hostname2
+ip3 hostname3
+```
+
+На каждом узле запустите скрипт [update-hosts.sh](./scripts/update-hosts.sh), который заполнит `/etc/hosts/:
+
+```bash
+bash ./scripts/update-hosts.sh hostnames.txt
+```
 
 ## Настройка YARN
 
