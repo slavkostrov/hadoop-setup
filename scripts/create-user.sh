@@ -5,7 +5,7 @@ USER="hadoop"
 echo "Create hadoop user..."
 
 # создаем пользователя hadoop
-sudo adduser --gecos "" "$USER"
+id "$USER" &>/dev/null || sudo adduser --gecos "" "$USER"
 
 # переключаемся на пользователя hadoop
 echo "Generate ssh key for hadoop user"
