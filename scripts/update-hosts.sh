@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 # проверяем, что передан файл с хостами
 if [ -z "$1" ]; then
   echo "Usage: $0 <file_with_hosts>"

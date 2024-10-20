@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -e
 # путь до известных ключей текщей ноды
 PUBLIC_KEY="/home/hadoop/.ssh/authorized_keys"
 # проверяем что файл существует

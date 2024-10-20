@@ -1,11 +1,8 @@
 #!/bin/bash
 
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 hostnames.txt"
-    exit 1
-fi
+set -e
 
-HOSTNAMES_FILE="$1"
+HOSTNAMES_FILE="hostnames.txt"
 MAIN_USER="team"
 
 DIST_NAME="hadoop-3.4.0.tar.gz"
