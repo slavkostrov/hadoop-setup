@@ -6,6 +6,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 HOSTNAMES_FILE="$1"
+MAIN_USER="team"
 
 # настраиваем текущую ноду
 echo "Setup current node"
@@ -33,11 +34,11 @@ for host in "${hosts[@]}"; do
     echo "Processing host: $host"
 
     # копируем все нужные файлы
-    sshpass -p "$ssh_password" scp create-user.sh "$HOSTNAMES_FILE" root@"$host":/
-    sshpass -p "$ssh_password" ssh root@"$host" 'bash /update-hosts.sh $HOSTNAMES_FILE'
+    sshpass -p "$ssh_password" scp create-user.sh "$HOSTNAMES_FILE" $MAIN_USER@"$host":/
+    sshpass -p "$ssh_password" ssh $MAIN_USER@"$host" 'bash /update-hosts.sh $HOSTNAMES_FILE'
 
     # нв выходе записываем public ssh ключ с удаленного хоста на локальный хост
-    sshpass -p "$ssh_password" ssh root@"$host" 'bash /create-user.sh' | tail -n1 >> "/home/hadoop/.ssh/authorized_keys"
+    sshpass -p "$ssh_password" ssh $MAIN_USER@"$host" 'bash /create-user.sh' | tail -n1 >> "/home/hadoop/.ssh/authorized_keys"
 
 done
 
