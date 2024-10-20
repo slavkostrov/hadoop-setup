@@ -20,7 +20,7 @@ current_ip=$(hostname -I | awk '{print $1}')
 declare -a hosts
 while read -r ip name; do
     if [[ "$name" != "$current_hostname" && "$ip" != "$current_ip" && "$name" != "" ]]; then
-        hosts+=("$ip")
+        hosts+=("$name")
     fi
 done < /etc/hosts
 
@@ -34,11 +34,11 @@ for host in "${hosts[@]}"; do
     echo "Processing host: $host"
 
     # копируем все нужные файлы
-    sshpass -p "$ssh_password" scp create-user.sh "$HOSTNAMES_FILE" $MAIN_USER@"$host":/
-    sshpass -p "$ssh_password" ssh $MAIN_USER@"$host" 'bash /update-hosts.sh $HOSTNAMES_FILE'
+    sshpass -p "$ssh_password" scp create-user.sh "$HOSTNAMES_FILE" $MAIN_USER@$host:/
+    sshpass -p "$ssh_password" ssh $MAIN_USER@$host 'bash /update-hosts.sh $HOSTNAMES_FILE'
 
     # нв выходе записываем public ssh ключ с удаленного хоста на локальный хост
-    sshpass -p "$ssh_password" ssh $MAIN_USER@"$host" 'bash /create-user.sh' | tail -n1 >> "/home/hadoop/.ssh/authorized_keys"
+    sshpass -p "$ssh_password" ssh $MAIN_USER@$host 'bash /create-user.sh' | tail -n1 >> "/home/hadoop/.ssh/authorized_keys"
 
 done
 
