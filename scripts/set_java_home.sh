@@ -8,6 +8,6 @@ HADOOP_ENV_FILE="/home/hadoop/hadoop-3.4.0/etc/hadoop/hadoop-env.sh"
 
 # допускаем, что в файле hadoop-env.sh всегда есть закомменченная переменная JAVA_HOME,
 # поэтому только добавляем новую.
-echo "export JAVA_HOME=$JAVA_HOME" >> "$HADOOP_ENV_FILE"
+echo "JAVA_HOME=$JAVA_HOME" >> "$HADOOP_ENV_FILE"
 
 echo "Переменная JAVA_HOME успешно добавлена в $HADOOP_ENV_FILE"
