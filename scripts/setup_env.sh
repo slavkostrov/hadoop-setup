@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # === настройка HADOOP_HOME и JAVA_HOME в .profile ===
 # определяем путь для Hadoop
 HADOOP_HOME="/home/hadoop/hadoop-3.4.0"
