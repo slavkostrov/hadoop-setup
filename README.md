@@ -101,7 +101,8 @@ bash ./scripts/update-hosts.sh hostnames.txt
 - #### Ручной
 
   На NameNode и DataNodes необходимо установить переменные окружения HADOOP, JAVA и PATH.
-  1) На NameNode открыть файл `~/.profile` с помощью консольного текстового редактора (например, Vim или Nano):
+
+  1\) На NameNode открыть файл `~/.profile` с помощью консольного текстового редактора (например, Vim или Nano):
     ```bash
     nano ~/.profile
     ```
@@ -121,7 +122,8 @@ bash ./scripts/update-hosts.sh hostnames.txt
     scp ~/.profile <your-node-name>:/home/hadoop
     ```
   После добавления переменных окружения на NameNode и DataNodes нужно добавить переменную JAVA_HOME в конфигурационный файл `hadoop-env.sh`.
-  2) Переходим в директорию, в котором находится файл:
+
+  2\) Переходим в директорию, в котором находится файл:
     ```bash
     cd hadoop-3.4.0/etc/hadoop
     ```
@@ -135,7 +137,8 @@ bash ./scripts/update-hosts.sh hostnames.txt
     scp hadoop-env.sh <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
     ```
   Настраиваем файловую систему.
-  3) Находясь в директории `hadoop-3.4.0/etc/hadoop`, с помощью консольного текстового редактора открываем файл `core-site.xml` и добавляем конфиг:
+  
+  3\) Находясь в директории `hadoop-3.4.0/etc/hadoop`, с помощью консольного текстового редактора открываем файл `core-site.xml` и добавляем конфиг:
     ```bash
     nano core-site.xml
     ```
@@ -147,7 +150,8 @@ bash ./scripts/update-hosts.sh hostnames.txt
       </property>
     </configuration>
     ```
-  4) Открываем файл `hdfs-site.xml` и добавляем конфиг:
+    
+  4\) Открываем файл `hdfs-site.xml` и добавляем конфиг:
     ```bash
     nano hdfs-site.xml
     ```
@@ -159,7 +163,8 @@ bash ./scripts/update-hosts.sh hostnames.txt
       </property>
     </configuration>
     ```
-  5) Открываем файл `workers`, удаляем localhost и добавляем туда адреса наших NameNode и всех DataNodes в формате <team-00-nn>:
+    
+  5\) Открываем файл `workers`, удаляем localhost и добавляем туда адреса наших NameNode и всех DataNodes в формате <team-00-nn>:
     ```bash
     nano workers
     ```
@@ -169,7 +174,8 @@ bash ./scripts/update-hosts.sh hostnames.txt
     team-00-dn-02
     ...
     ```
-  6) Копируем заполненные файлы `core-site.xml`, `hdfs-site.xml` и `workers` на оставшиеся DataNodes:
+    
+  6\) Копируем заполненные файлы `core-site.xml`, `hdfs-site.xml` и `workers` на оставшиеся DataNodes:
     ```bash
     scp core-site.xml <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
     scp hdfs-site.xml <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
