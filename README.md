@@ -80,11 +80,107 @@ ip2 hostname2
 ip3 hostname3
 ```
 
-На каждом узле запустите скрипт [update-hosts.sh](./scripts/update-hosts.sh), который заполнит `/etc/hosts/:
+На каждом узле запустите скрипт [update-hosts.sh](./scripts/update-hosts.sh), который заполнит `/etc/hosts/`:
 
 ```bash
 bash ./scripts/update-hosts.sh hostnames.txt
 ```
+
+### Добавление переменных окружения и настройка файловой системы
+
+Рассмотрим два варианта настройки: автоматический и ручной.
+
+- #### Автоматический
+
+  На NameNode и DataNodes необходимо запустить скрипт [setup_env.sh](./scripts/setup_env.sh), который добавит все необходимые переменные и настроит файловую систему (файлы `core-site.xml`, `hdfs-site.xml` и `workers`):
+
+  ```bash
+  bash ./scripts/setup_env.sh
+  ```
+
+- #### Ручной
+
+  На NameNode и DataNodes необходимо установить переменные окружения HADOOP, JAVA и PATH.
+
+  1\) На NameNode открыть файл `~/.profile` с помощью консольного текстового редактора (например, Vim или Nano):
+    ```bash
+    nano ~/.profile
+    ```
+    и вставить туда 3 переменные окружения (путь к Java можно найти через команды `which java` и `readlink -f <which java>`.
+    В нашем случае путь - /usr/lib/jvm/java-11-openjdk-amd64/bin/java).
+    ```bash
+    export HADOOP_HOME=/home/hadoop/hadoop-3.4.0
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/bin/java
+    export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+    ```
+    Также необходимо активировать наши переменные с помощью команды:
+    ```bash
+    source ~/.profile 
+    ```
+    После копируем файл `~/.profile` на оставшиеся DataNodes с помощью команды:
+    ```bash
+    scp ~/.profile <your-node-name>:/home/hadoop
+    ```
+  После добавления переменных окружения на NameNode и DataNodes нужно добавить переменную JAVA_HOME в конфигурационный файл `hadoop-env.sh`.
+
+  2\) Переходим в директорию, в котором находится файл:
+    ```bash
+    cd hadoop-3.4.0/etc/hadoop
+    ```
+    и открываем файл с помощью консольного текстового редактора:
+    ```bash
+    nano hadoop-env.sh
+    ```
+    В файл добавляем нашу переменную `JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/bin/java`.
+    После копируем файл `hadoop-env.sh` на оставшиеся DataNodes с помощью команды:
+    ```bash
+    scp hadoop-env.sh <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
+    ```
+  Настраиваем файловую систему.
+  
+  3\) Находясь в директории `hadoop-3.4.0/etc/hadoop`, с помощью консольного текстового редактора открываем файл `core-site.xml` и добавляем конфиг:
+    ```bash
+    nano core-site.xml
+    ```
+    ```bash
+    <configuration>
+      <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://<team-00-nn>:9000</value>
+      </property>
+    </configuration>
+    ```
+    
+  4\) Открываем файл `hdfs-site.xml` и добавляем конфиг:
+    ```bash
+    nano hdfs-site.xml
+    ```
+    ```bash
+    <configuration>
+      <property>
+        <name>dfs.replication</name>
+        <value>3</value>
+      </property>
+    </configuration>
+    ```
+    
+  5\) Открываем файл `workers`, удаляем localhost и добавляем туда адреса наших NameNode и всех DataNodes в формате <team-00-nn>:
+    ```bash
+    nano workers
+    ```
+    ```bash
+    team-00-nn
+    team-00-dn-01
+    team-00-dn-02
+    ...
+    ```
+    
+  6\) Копируем заполненные файлы `core-site.xml`, `hdfs-site.xml` и `workers` на оставшиеся DataNodes:
+    ```bash
+    scp core-site.xml <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
+    scp hdfs-site.xml <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
+    scp workers <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
+    ```
 
 ## Настройка YARN
 
