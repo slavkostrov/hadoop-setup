@@ -9,6 +9,8 @@
     - [Создание пользователя](#создание-пользователя)
     - [Скачивание дистрибутива Hadoop](#скачивание-дистрибутива-hadoop)
     - [Заполнение хостов](#заполнение-хостов)
+    - [Добавление переменных окружения и настройка файловой системы](#добавление-переменных-окружения-и-настройка-файловой-системы)
+    - [Запуск кластера](#запуск-кластера)
   - [Настройка YARN](#настройка-yarn)
 
 ## Требования
@@ -107,10 +109,10 @@ bash ./scripts/update-hosts.sh hostnames.txt
     nano ~/.profile
     ```
     и вставить туда 3 переменные окружения (путь к Java можно найти через команды `which java` и `readlink -f <which java>`.
-    В нашем случае путь - /usr/lib/jvm/java-11-openjdk-amd64/bin/java).
+    В нашем случае путь - /usr/lib/jvm/java-11-openjdk-amd64/).
     ```bash
     export HADOOP_HOME=/home/hadoop/hadoop-3.4.0
-    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/bin/java
+    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
     export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
     ```
     Также необходимо активировать наши переменные с помощью команды:
@@ -131,7 +133,7 @@ bash ./scripts/update-hosts.sh hostnames.txt
     ```bash
     nano hadoop-env.sh
     ```
-    В файл добавляем нашу переменную `JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/bin/java`.
+    В файл добавляем нашу переменную `JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/`.
     После копируем файл `hadoop-env.sh` на оставшиеся DataNodes с помощью команды:
     ```bash
     scp hadoop-env.sh <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
@@ -181,6 +183,28 @@ bash ./scripts/update-hosts.sh hostnames.txt
     scp hdfs-site.xml <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
     scp workers <your-node-name>:/home/hadoop/hadoop-3.4.0/etc/hadoop
     ```
+
+### Запуск кластера
+
+Используя пользователя `hadoop` зайдите в директорию с дистрибутивом и выполните форматирование неймноды:
+
+```bash
+bin/hdfs namenode -format
+```
+
+В случае успешного выполнения команды все готово к запуску кластера, для этого из той же директории выполните:
+
+```bash
+sbin/start-dfs.sh
+```
+
+Для проверки, что на каждом из кластеров запущено всё, что нужно, можно выполнить команду:
+
+```
+jps
+```
+
+Для NameNode будет несколько сервисов (name node, secondary name node и data node), для DataNode будет только data node.
 
 ## Настройка YARN
 
