@@ -1,3 +1,5 @@
+set -e
+
 MAIN_USER="team"
 
 NGINX_YARN_AVAILABLE_CONF_PATH="/etc/nginx/sites-available/yarn"
@@ -10,8 +12,18 @@ if [ -f "$NGINX_YARN_AVAILABLE_CONF_PATH" ]; then
   exit 1
 fi
 
+if [ -f "$NGINX_YARN_ENABLED_CONF_PATH" ]; then
+  echo "File $NGINX_YARN_ENABLED_CONF_PATH already exists"
+  exit 1
+fi
+
 if [ -f "$NGINX_HSERVER_AVAILABLE_CONF_PATH" ]; then
   echo "File $NGINX_HSERVER_AVAILABLE_CONF_PATH already exists"
+  exit 1
+fi
+
+if [ -f "$NGINX_HSERVER_ENABLED_CONF_PATH" ]; then
+  echo "File $NGINX_HSERVER_ENABLED_CONF_PATH already exists"
   exit 1
 fi
 
