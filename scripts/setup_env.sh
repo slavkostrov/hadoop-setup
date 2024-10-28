@@ -7,7 +7,7 @@ set -e
 HADOOP_HOME="/home/hadoop/hadoop-3.4.0"
 
 # определяем путь для Java
-JAVA_HOME=$(readlink -f $(which java))
+JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
 
 # добавляем переменные в .profile
 echo "export HADOOP_HOME=$HADOOP_HOME" >> ~/.profile
@@ -40,6 +40,9 @@ NAMENODE_ADDRESS="hdfs://$NAMENODE_NAME:9000"
 # определяем путь к файлу core-site.xml
 CORE_SITE_FILE="$HADOOP_HOME/etc/hadoop/core-site.xml"
 
+# удаляем существующий конфиг с содержимым в core-site.xml
+sed -i '/<configuration>/,/<\/configuration>/d' "$CORE_SITE_FILE"
+
 # добавляем параметр fs.defaultFS в core-site.xml
 cat <<EOL >> "$CORE_SITE_FILE"
 <configuration>
@@ -55,6 +58,9 @@ echo "-------------------------------------------"
 # === настройка hdfs-site.xml ===
 # определяем путь к файлу hdfs-site.xml
 HDFS_SITE_FILE="$HADOOP_HOME/etc/hadoop/hdfs-site.xml"
+
+# удаляем существующий конфиг с содержимым в hdfs-site.xml
+sed -i '/<configuration>/,/<\/configuration>/d' "$HDFS_SITE_FILE"
 
 # добавляем параметр репликации в hdfs-site.xml
 cat <<EOL >> "$HDFS_SITE_FILE"
