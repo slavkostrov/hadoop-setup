@@ -5,12 +5,6 @@ NGINX_YARN_ENABLED_CONF_PATH="/etc/nginx/sites-enabled/yarn"
 NGINX_HSERVER_AVAILABLE_CONF_PATH="/etc/nginx/sites-available/hserver"
 NGINX_HSERVER_ENABLED_CONF_PATH="/etc/nginx/sites-enabled/hserver"
 
-# Setup nginx
-
-echo "Setting up nginx for yarn and historyserver"
-read -p "Enter namenode host: " NAMENODE_HOST
-read -sp "Enter password for sudo: " main_password
-
 if [ -f "$NGINX_YARN_AVAILABLE_CONF_PATH" ]; then
   echo "File $NGINX_YARN_AVAILABLE_CONF_PATH already exists"
   exit 1
@@ -21,10 +15,16 @@ if [ -f "$NGINX_HSERVER_AVAILABLE_CONF_PATH" ]; then
   exit 1
 fi
 
-if [ ! $(whoami) eq "$MAIN_USER" ]; then
+if [[ "$(whoami)" != "$MAIN_USER" ]]; then
   echo "Wrong user to setup ngnix: $(whoami). Switch to $MAIN_USER"
-  exit 1 
+  exit 1
 fi
+
+# Setup nginx
+
+echo "Setting up nginx for yarn and historyserver"
+read -p "Enter namenode host: " NAMENODE_HOST
+read -sp "Enter password for sudo: " main_password
 
 # yarn
 echo '$main_password' | sudo -S cp /etc/nginx/sites-available/default $NGINX_YARN_AVAILABLE_CONF_PATH
