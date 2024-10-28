@@ -5,14 +5,6 @@ set -e
 MAPRED_CONF_FILEPATH="$HADOOP_HOME/etc/hadoop/mapred-site.xml"
 YARN_CONF_FILEPATH="$HADOOP_HOME/etc/hadoop/yarn-site.xml"
 
-HOSTNAMES_FILE="../../hostnames.txt"
-
-NGINX_YARN_AVAILABLE_CONF_PATH="/etc/nginx/sites-available/yarn"
-NGINX_YARN_ENABLED_CONF_PATH="/etc/nginx/sites-enabled/yarn"
-NGINX_HSERVER_AVAILABLE_CONF_PATH="/etc/nginx/sites-available/hserver"
-NGINX_HSERVER_ENABLED_CONF_PATH="/etc/nginx/sites-enabled/hserver"
-
-
 # mapred-site.xml
 
 # remove old configuration
@@ -30,7 +22,7 @@ cat <<EOL >> "$MAPRED_CONF_FILEPATH"
         <name>mapreduce.application.classpath</name>
         <value>$HADOOP_HOME/share/hadoop/mapreduce/*:$HADOOP_HOME/share/hadoop/mapreduce/lib/*</value>
     </property>
-<configuration>
+</configuration>
 EOL
 
 
@@ -51,7 +43,7 @@ cat <<EOL >> "$YARN_CONF_FILEPATH"
         <name>yarn.nodemanager.env-whitelist</name>
         <value>JAVA_HOME,HADOOP_COMMON_HOME,HADOOP_HDFS_HOME,HADOOP_CONF_DIR,CLASSPATH_PREPEND_DISTCACHE,HADOOP_YARN_HOME,HADOOP_HOME,PATH,LANG.TZ,HADOOP_MAPRED_HOME</value>
     </property>
-<configuration>
+</configuration>
 EOL
 
 
@@ -59,8 +51,6 @@ EOL
 
 # Get all cluster nodes
 echo "Preparing to transfer conf file to all cluster nodes..."
-
-bash update-hosts.sh "$HOSTNAMES_FILE"
 
 current_hostname=$(hostname)
 current_ip=$(hostname -I | awk '{print $1}')
@@ -80,39 +70,16 @@ echo
 echo "Start data transfer"
 for host in "${hosts[@]}"; do
     # Copy files
-    sshpass -p "$ssh_password" scp $MAPRED_CONF_FILE $host:$HADOOP_HOME/etc/hadoop
-    sshpass -p "$ssh_password" scp $YARN_CONF_FILE $host:$HADOOP_HOME/etc/hadoop
+    echo transfer "$MAPRED_CONF_FILEPATH" to "$host:$HADOOP_HOME/etc/hadoop"
+    sshpass -p "$ssh_password" scp "$MAPRED_CONF_FILEPATH" "$host:$HADOOP_HOME/etc/hadoop"
+
+    echo transfer "$YARN_CONF_FILEPATH" to "$host:$HADOOP_HOME/etc/hadoop"
+    sshpass -p "$ssh_password" scp "$YARN_CONF_FILEPATH" "$host:$HADOOP_HOME/etc/hadoop"
+
     echo "Host $host: transfer is done"
 
 done
 
-
-# Setup nginx
-
-echo "Setting up nginx for yarn and historyserver"
-read -p "Enter namenode host: " NAMENODE_HOST
-read -sp "Enter password for sudo: " sudo_password
-
-if [ -f "$NGINX_YARN_AVAILABLE_CONF_PATH" ]; then
-  echo "File $NGINX_YARN_AVAILABLE_CONF_PATH already exists"
-  exit 1
-fi
-
-if [ -f "$NGINX_HSERVER_AVAILABLE_CONF_PATH" ]; then
-  echo "File $NGINX_HSERVER_AVAILABLE_CONF_PATH already exists"
-  exit 1
-fi
-
-# yarn
-echo $sudo_password | sudo -S cp /etc/nginx/sites-avaialable/default $NGINX_YARN_AVAILABLE_CONF_PATH
-echo $sudo_password | sudo -S sed -i -e 's/80/8088/g' -e '/\[::\]/d' -e "0,/try_files/s/.*try_files.*/\t\tproxy_pass http:\/\/$NAMENODE_HOST:8088;/" $NGINX_YARN_AVAILABLE_CONF_PATH
-echo $sudo_password | sudo -S ln -s $NGINX_YARN_AVAILABLE_CONF_PATH $NGINX_YARN_ENABLED_CONF_PATH
-
-# history server
-echo $sudo_password | sudo -S cp /etc/nginx/sites-avaialable/default $NGINX_HSERVER_AVAILABLE_CONF_PATH
-echo $sudo_password | sudo -S sed -i -e 's/80/19888/g' -e '/\[::\]/d' -e "0,/try_files/s/.*try_files.*/\t\tproxy_pass http:\/\/$NAMENODE_HOST:19888;/" $NGINX_HSERVER_AVAILABLE_CONF_PATH
-echo $sudo_password | sudo -S ln -s $NGINX_HSERVER_AVAILABLE_CONF_PATH $NGINX_HSERVER_ENABLED_CONF_PATH
-
-echo "Nginx setup is succesful, reload nginx with `sudo systemctl reload nginx`"
+echo "Yarn setup is succesfull!"
 
 exit 0
