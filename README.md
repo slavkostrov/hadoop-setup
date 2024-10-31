@@ -376,12 +376,12 @@ __Работа в Hive__:
 
 0. Предварительно скачаем кусочек данных для загрузки в Hive в home директории:
 ```bash
-wget https://github.com/slavkostrov/hadoop-setup/tree/master/sample_data/raw_sales.csv
+git clone https://github.com/slavkostrov/hadoop-setup/tree/master
 ```
 переходим в папку `hadoop-3.4.0/sbin` создадим новую директорию на hdfs и положим туда файлы:
 ```bash
 hdfs dfs -mkdir /user/data
-hdfs dfs -copyFromLocal ../../raw_sales.csv /user/data/
+hdfs dfs -copyFromLocal /home/hadoop/hadoop-setup/sample_data/raw_sales.csv /user/data/
 ```
 1. Для работы в Hive нужно запустить клиент `beeline`, который представляет собой консоль для SQL команд:
 ```bash
@@ -393,23 +393,14 @@ CREATE DATABASE test;
 ```
 ```sql
 CREATE TABLE IF NOT EXISTS test.houses_ts (
-  datesold date,
-  postcode int,
-  price int,
-  propertyType string,
-  bedrooms int
-) COMMENT 'house sales' 
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ',';
-```
-```sql
-CREATE TABLE IF NOT EXISTS test.houses_ts (
   datesold timestamp,
   postcode int,
   price int,
   propertyType string,
   bedrooms int
 ) COMMENT 'house sales' 
-ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+STORED AS textfile
 tblproperties("skip.header.line.count"="1");
 ```
 ```sql
