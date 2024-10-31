@@ -381,7 +381,7 @@ wget https://github.com/slavkostrov/hadoop-setup/tree/master/sample_data/raw_sal
 переходим в папку `hadoop-3.4.0/sbin` создадим новую директорию на hdfs и положим туда файлы:
 ```bash
 hdfs dfs -mkdir /user/data
-hdfs dfs -copyFromLocal ../../data_sample.csv /user/data/
+hdfs dfs -copyFromLocal ../../raw_sales.csv /user/data/
 ```
 1. Для работы в Hive нужно запустить клиент `beeline`, который представляет собой консоль для SQL команд:
 ```bash
@@ -413,7 +413,7 @@ ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
 tblproperties("skip.header.line.count"="1");
 ```
 ```sql
-LOAD DATA INPATH '/user/data/data_sample.csv' INTO TABLE test.houses_ts;
+LOAD DATA INPATH '/user/data/raw_sales.csv' INTO TABLE test.houses_ts;
 ```
 3. Далее полученную таблицу трансформируем в партиционированную:
 ```sql
