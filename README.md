@@ -15,6 +15,9 @@
   - [Настройка YARN](#настройка-yarn)
     - [Конфигурация YARN и History Server](#конфигурация-yarn-и-history-server)
     - [Настройка nginx для YARN и History Server](#настройка-nginx-для-yarn-и-history-server)
+  - [Настройка Hive](#настройка-hive)
+    - [Конфигурация Hive](#конфигурация-hive)
+    - [Создание базы данных и таблиц в Hive](#создание-базы-данных-и-таблиц-в-hive)
 
 ## Требования
 
@@ -371,6 +374,8 @@ source hive-setup.sh
 ```bash
 beeline -u jdbc:hive2://{jumpnode_name}:10000
 ```
+
+### Создание базы данных и таблиц в Hive
 
 __Работа в Hive__: 
 
