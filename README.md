@@ -287,3 +287,128 @@ __Порядок действий__:
 3. Запустить скрипт `scripts/nginx-yarn.sh`, в процессе необходимо ввести хост jump-ноды и пароль для прав sudo (выполняется создание nginx файлов для доступа к `yarn` и `historyserver`)
 4. Выполнить команду `sudo systemctl reload nginx` и перезайти на ноду
 5. Проверить что доступны: `YARN` по адресу `http://<jump-node-host>:8088`, `JobHistoryServer` - по адресу `http://<jump-node-host>:19888`
+
+## Настройка HIVE
+
+### Конфигурация HIVE
+
+__Пререквизиты__:
+
+Для нод кластера:
+- Развернут `HDFS`
+
+Для пользователя `hadoop` на jump-ноде:
+- Настроены глобальные переменные `HADOOP_HOME`, `JAVA_HOME`. Последняя прокинута в `$HADOOP_HOME/etc/hadoop/hadoop-env.sh`
+- Актуальные хосты указаны в `/etc/hosts` в формате (`ip`, `name`)
+- Доступны права на запись в директорию `$HADOOP_HOME`
+- Скачан скрипт `scripts/hive-setup.sh`
+
+__Создание директорий на HDFS__:
+1. На name node под юзером hadoop последовательно создать директории и выдать права на их чтение и запись:
+```bash
+hdfs dfs -mkdir /tmp
+hdfs dfs -mkdir -p /user/hive/warehouse
+hdfs dfs -chmod g+w /tmp
+hdfs dfs -chmod g+w /user/hive/warehouse
+```
+
+__Настройка postgresql для Hive__:
+1. Качаем дистрибутив PostgreSQL, запустив в консоли 
+```bash
+sudo apt install postgresql postgresql-contrib
+```
+2. Заходим под юзером postgres 
+```bash
+sudo -i -u postgres
+```
+3. Запускаем командную строку, выполнив `psql`
+4. Создаем датабазу и юзера для Hive, передавая ему все права и базу во владение:
+```sql
+CREATE DATABASE metastore;
+CREATE USER hive with password 'hive';
+GRANT ALL PRIVILEGES ON DATABASE "metastore" to hive;
+ALTER DATABASE metastore OWNER TO hive;
+```
+и выходим из командной строки `\q` и юзера `exit`.
+5. На jump node открываем 
+```bash
+sudo nano /etc/hosts
+``` 
+и вписываем туда ip и название `127.0.0.1 localhost`.
+6. Заходим в конфиг postgresql 
+```bash
+sudo nano /etc/postgresql/16/main/pg_hba.conf
+```
+и после строчки `# IPv4 local connections:` вписываем:
+```bash
+host    all             all             192.168.1.1/24          scram-sha-256
+```
+7. Перезапускаем postgresql 
+```bash
+sudo systemctl restart postgresql
+```
+
+__Порядок действий для установки__:
+
+1. Качаем дистрибутив Apache Hive, запустив в консоли 
+```bash
+wget https://dlcdn.apache.org/hive/hive-4.0.1/apache-hive-4.0.1-bin.tar.gz
+```
+2. Распаковываем его 
+```bash
+tar -xzvf apache-hive-4.0.1-bin.tar.gz
+```
+3. Скрипт `hive-setup.sh` кладем в `apache-hive-4.0.1-bin`, запустив 
+```bash
+mv hive-setup.sh apache-hive-4.0.1-bin/hive-setup.sh
+```
+4. Переходим в директорию дистрибутива `cd apache-hive-4.0.1-bin`
+5. Запускаем скрипт `hive-setup.sh`
+```bash
+source hive-setup.sh
+```
+6. Для того, чтобы воспользоваться Hive, запускаем команду 
+```bash
+beeline -u jdbc:hive2://{jumpnode_name}:10000
+```
+
+__Работа в Hive__: 
+
+0. Предварительно скачаем кусочек данных для загрузки в Hive в home директории:
+```bash
+git clone https://github.com/slavkostrov/hadoop-setup/tree/master
+```
+переходим в папку `hadoop-3.4.0/sbin` создадим новую директорию на hdfs и положим туда файлы:
+```bash
+hdfs dfs -mkdir /user/data
+hdfs dfs -copyFromLocal /home/hadoop/hadoop-setup/sample_data/raw_sales.csv /user/data/
+```
+1. Для работы в Hive нужно запустить клиент `beeline`, который представляет собой консоль для SQL команд:
+```bash
+beeline -u jdbc:hive2://{jumpnode_name}:10000
+```
+2. Создадим датабазу и таблицу, выполнив последовательно:
+```sql
+CREATE DATABASE test;
+```
+```sql
+CREATE TABLE IF NOT EXISTS test.houses_ts (
+  datesold timestamp,
+  postcode int,
+  price int,
+  propertyType string,
+  bedrooms int
+) COMMENT 'house sales' 
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+STORED AS textfile
+tblproperties("skip.header.line.count"="1");
+```
+```sql
+LOAD DATA INPATH '/user/data/raw_sales.csv' INTO TABLE test.houses_ts;
+```
+3. Далее полученную таблицу трансформируем в партиционированную:
+```sql
+CREATE TABLE test.houses_partitioned
+PARTITIONED BY (datesold)
+AS SELECT * FROM test.houses_ts;
+```
