@@ -814,20 +814,3 @@ AS SELECT * FROM test.houses_ts;
    ```
 
 ---
-
-### **8. Завершение работы**
-
-#### **8.1 Остановим PySpark**
-1. Введите команду:
-   ```python
-   exit()
-   ```
-
-#### **8.2 Очистим временные данные HDFS**
-1. Удалим тестовые файлы:
-   ```bash
-   hdfs dfs -rm -r /user/hadoop/input
-   hdfs dfs -rm -r /user/hadoop/output/transformed_data
-   ```
-
----
