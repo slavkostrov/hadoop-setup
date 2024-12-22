@@ -822,6 +822,7 @@ AS SELECT * FROM test.houses_ts;
 __Пререквизиты__:
 1. Настроен Spark с Yarn
 2. Запущен Hive Metastore (`hive --service metastore`)
+3. Подтянута свежая версия данного репозитория, в которой есть Airflow DAG в виде [скрипта](https://github.com/slavkostrov/hadoop-setup/blob/master/airflow/task_dag.py)
 
 __Алгоритм запуска__:
 1. Авторизуемся в hadoop пользователя на джамп ноде
