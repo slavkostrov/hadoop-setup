@@ -830,19 +830,20 @@ __Алгоритм запуска__:
    ```
 2. Создаем и активируем виртуальное окружение под Airflow
    ```bash
+   mkdir -p /home/hadoop/airflow-task-check && cd /home/hadoop/airflow-task-check
    python3 -m venv airflow_venv
    source airflow_venv/bin/activate
    ```
-3. Выставляем переменные окружения, в нашем случае выставим `AIRFLOW_HOME` в `/home/hadoop/airflow-task/airflow`
+3. Выставляем переменные окружения, в нашем случае выставим `AIRFLOW_HOME` в `/home/hadoop/airflow-task-check/airflow`
    ```bash
-   export AIRFLOW_HOME=/home/hadoop/airflow-task/airflow
+   export AIRFLOW_HOME=/home/hadoop/airflow-task-check/airflow
    ```
 4. Подгружаем необходимые пакеты через pip
    ```bash
    pip install "apache-airflow[celery]==2.10.3" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.3/constraints-3.12.txt"
    pip install pyspark
    ```
-6. Запускаем Airflow
+6. Запускаем Airflow, после запуска будет доступен на порту 8080
    ```bash
    airflow standalone
    ```
