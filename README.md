@@ -24,6 +24,7 @@
       - [Установка и настройка Spark](#3-установка-и-настройка-spark)
       - [Запуск сессии Apache Spark под управлением YARN](#4-запуск-сессии-apache-spark-под-управлением-yarn)
       - [Чтение данных из HDFS и трансформации](#5-чтение-данных-из-hdfs-и-трансформации)
+  - [Настройка Airflow](#настройка-airflow)
 
 
 
@@ -629,8 +630,11 @@ AS SELECT * FROM test.houses_ts;
    ```bash
    source ~/.bashrc
    ```
-
-2. Проверим, что Spark работает:
+2. Прокинем необходимые джарники
+   ```bash
+   cp /home/hadoop/apache-hive-4.0.0-alpha-2-bin/lib/guava-19.0.jar /home/hadoop/spark-3.5.3-bin-hadoop3/jars/
+   ```
+3. Проверим, что Spark работает:
    ```bash
    spark-submit --version
    ```
@@ -813,4 +817,40 @@ AS SELECT * FROM test.houses_ts;
    SELECT * FROM result_table;
    ```
 
+## Настройка Airflow
+
+__Пререквизиты__:
+1. Настроен Spark с Yarn
+2. Запущен Hive Metastore (`hive --service metastore`)
+
+__Алгоритм запуска__:
+1. Авторизуемся в hadoop пользователя на джамп ноде
+   ```bash
+   sudo -i -u hadoop
+   ```
+2. Создаем и активируем виртуальное окружение под Airflow
+   ```bash
+   python3 -m venv airflow_venv
+   source airflow_venv/bin/activate
+   ```
+3. Выставляем переменные окружения, в нашем случае выставим `AIRFLOW_HOME` в `/home/hadoop/airflow-task/airflow`
+   ```bash
+   export AIRFLOW_HOME=/home/hadoop/airflow-task/airflow
+   ```
+4. Подгружаем необходимые пакеты через pip
+   ```bash
+   pip install "apache-airflow[celery]==2.10.3" --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.10.3/constraints-3.12.txt"
+   pip install pyspark
+   ```
+6. Запускаем Airflow
+   ```bash
+   airflow standalone
+   ```
+7. Подменяем директорию с дагами в `airflow.cfg`. В файле `$AIRFLOW_HOME/airflow.cfg` подменяем `dags_folder = /home/hadoop/hadoop-setup/airflow`
+8. Перезапускаем Airflow, в списке дагов должен появиться `TASK_process_raw_data`
+9. Активируем и запускаем даг в UI (Trigger DAG)
+10. После успешной отработки можно посмотреть на результаты вычислений, обе выходные таблицы партиционированы
+```bash
+   hdfs dfs -ls /user/hive/warehouse/
+```
 ---
